@@ -1,0 +1,48 @@
+# Personal Identifiable Information (PII) - DO NOT COMMIT
+*.vcf.gz
+*.vcf
+*.bcf
+*.bcf.gz
+*_nucleus_dna_download_vcf_*.vcf.gz
+*_genome*.vcf.gz
+*personal*.vcf.gz
+
+# Results files with actual data
+prs_results.csv
+prs_summary.txt
+
+# Cache files (may contain position mappings)
+rsid_positions_cache.json
+
+# Virtual environment
+prs_env/
+venv/
+env/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Nucleus reference data (if large)
+nucleus/
+
+# Logs
+*.log
