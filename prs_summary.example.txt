@@ -1,0 +1,19 @@
+PRS Calculation Summary
+======================================================================
+
+Total SNPs in Nucleus reference: 1,000
+SNPs in personal genome (with rsID): 0
+SNPs used for PRS calculation: 0
+SNPs dropped (allele mismatch): 0
+
+PRS Results:
+----------------------------------------------------------------------
+ALZHEIMERS                           0.000000
+BREASTCANCER                         0.000000
+CORONARYARTERYDISEASE                0.000000
+ENDOMETRIOSIS                        0.000000
+HYPERTENSION                         0.000000
+PROSTATECANCER                       0.000000
+RHEUMATOIDARTHRITIS                  0.000000
+TYPE1DIABETES                        0.000000
+TYPE2DIABETES                        0.000000
