@@ -1,0 +1,13 @@
+common variants:
+https://ftp.ncbi.nih.gov/snp/organisms/human_9606/VCF/
+00-All.vcf.gz                       2018-04-23 11:40   15G        <-- includes all variants, rare + common as a subset 
+
+clinical variants:
+https://ftp.ncbi.nlm.nih.gov/pub/clinvar/
+
+hg38:
+https://repo.bioserver.ieo.it/dima/hg38/funcotator_dataSources.v1.8.2024g/dbsnp/hg38/#:~:text=GCF_000001405,2024%2016%3A47%2054
+
+refSNP for dbSNP:
+https://www.ncbi.nlm.nih.gov/snp/docs/RefSNP_about/
+
