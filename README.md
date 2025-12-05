@@ -43,17 +43,55 @@ uv pip install -r requirements.txt
 
 ## Quick Start
 
+### Step 1: Create Mapping File (Required if VCF lacks rsIDs)
+
+First, download a dbSNP VCF file (one-time setup):
+
 ```bash
-# Update DEFAULT_VCF_PATH in calculate_prs.py or use --vcf flag
+# Download dbSNP VCF from NCBI (choose appropriate build, e.g., GRCh38)
+# Example for common variants:
+wget https://ftp.ncbi.nih.gov/snp/organisms/human_9606_b151/VCF/00-common_all.vcf.gz
 
+# Or download chromosome-specific files for smaller downloads:
+# wget https://ftp.ncbi.nih.gov/snp/organisms/human_9606_b151/VCF/chr1.vcf.gz
+# ... (repeat for other chromosomes)
+```
+
+Create the mapping file:
+
+```bash
+# Activate environment
+source .venv/bin/activate
+
+# Create mapping file (this may take 10-30 minutes depending on dbSNP size)
+python create_mapping_bcftools.py \
+  --nucleus /home/bradley-woolf/Desktop/data/nucleus/NUCLEUS_ORIGIN_V1/NUCLEUS_ORIGIN_V1.tsv \
+  --dbsnp 00-common_all.vcf.gz \
+  --output rsid_mapping.tsv
+
+# For testing with limited rsIDs:
+python create_mapping_bcftools.py \
+  --nucleus /home/bradley-woolf/Desktop/data/nucleus/NUCLEUS_ORIGIN_V1/NUCLEUS_ORIGIN_V1.tsv \
+  --dbsnp 00-common_all.vcf.gz \
+  --output test_mapping.tsv \
+  --limit 1000
+```
+
+### Step 2: Calculate PRS
+
+```bash
 # Test with small sample first (recommended)
-python calculate_prs.py --test
+python calculate_prs.py \
+  --nucleus /home/bradley-woolf/Desktop/data/nucleus/NUCLEUS_ORIGIN_V1/NUCLEUS_ORIGIN_V1.tsv \
+  --vcf /home/bradley-woolf/Desktop/wgs_data/Bradley_Woolf_nucleus_dna_download_vcf_NU-YRIT-0309.vcf.gz \
+  --mapping rsid_mapping.tsv \
+  --test
 
-# Run full calculation (will take time if VCF lacks rsIDs)
-python calculate_prs.py
-
-# Or specify custom file paths
-python calculate_prs.py --nucleus path/to/nucleus.tsv --vcf path/to/genome.vcf.gz
+# Run full calculation
+python calculate_prs.py \
+  --nucleus /home/bradley-woolf/Desktop/data/nucleus/NUCLEUS_ORIGIN_V1/NUCLEUS_ORIGIN_V1.tsv \
+  --vcf /home/bradley-woolf/Desktop/wgs_data/Bradley_Woolf_nucleus_dna_download_vcf_NU-YRIT-0309.vcf.gz \
+  --mapping rsid_mapping.tsv
 ```
 
 ## Input Files
@@ -69,36 +107,50 @@ python calculate_prs.py --nucleus path/to/nucleus.tsv --vcf path/to/genome.vcf.g
 The script matches SNPs between the reference and your genome in two ways:
 
 1. **By rsID** (preferred): If your VCF has rsIDs in the ID column
-2. **By position** (fallback): If rsIDs are missing, the script fetches chromosome/position mappings from Ensembl API
+2. **By position** (required if VCF lacks rsIDs): Uses a mapping file to match by coordinates
 
 **Important Notes**:
-- If your VCF doesn't have rsIDs, position-based matching for 2M+ SNPs via API can take **several hours** on the first run
-- The script caches position mappings in `rsid_positions_cache.json` - subsequent runs will be much faster
-- For faster results, consider annotating your VCF with rsIDs first (see below)
+- **Mapping file required**: You must provide a mapping file with `--mapping` option for position-based matching
+  - Format: TSV with columns: rsID, chr, pos, ref, alt (header optional)
+  - Create using: `python create_mapping_bcftools.py --nucleus NUCLEUS.tsv --dbsnp dbSNP.vcf.gz --output mapping.tsv`
+- Not all SNPs in the Nucleus reference will be present in your VCF - this is normal
 - You can test with `--test` flag to process only 1000 SNPs first
 
-### Option: Annotate VCF with rsIDs (Recommended)
+### Creating a Mapping File
 
-If your VCF lacks rsIDs, you can annotate it using bcftools:
+The mapping file maps rsIDs to chromosome positions. Create it once and reuse:
 
-```bash
-# Download dbSNP VCF (one-time setup)
-# You'll need a dbSNP VCF file, e.g., from:
-# https://ftp.ncbi.nih.gov/snp/organisms/human_9606_b151/VCF/
+**Requirements:**
+- bcftools installed (`conda install -c bioconda bcftools`)
+- dbSNP VCF file (download from NCBI)
 
-# Annotate your VCF (example - adjust paths as needed)
-bcftools annotate \
-  -a dbsnp.vcf.gz \
-  -c ID \
-  -O z \
-  -o annotated.vcf.gz \
-  your_genome.vcf.gz
+**Steps:**
 
-# Then index it
-bcftools index annotated.vcf.gz
+1. **Download dbSNP VCF** (if not already done):
+   ```bash
+   # Common variants (recommended, ~2-3 GB):
+   wget https://ftp.ncbi.nih.gov/snp/organisms/human_9606_b151/VCF/00-common_all.vcf.gz
+   
+   # Or chromosome-specific (smaller, combine later):
+   wget https://ftp.ncbi.nih.gov/snp/organisms/human_9606_b151/VCF/chr1.vcf.gz
+   # ... download other chromosomes as needed
+   ```
 
-# Update the script to use annotated.vcf.gz
-```
+2. **Create mapping file**:
+   ```bash
+   python create_mapping_bcftools.py \
+     --nucleus /path/to/NUCLEUS_ORIGIN_V1.tsv \
+     --dbsnp 00-common_all.vcf.gz \
+     --output rsid_mapping.tsv
+   ```
+   
+   This will:
+   - Extract all rsIDs from the Nucleus TSV
+   - Query the dbSNP VCF for their positions
+   - Create a TSV mapping file: `rsID, chr, pos, ref, alt`
+   - Take 10-30 minutes depending on dbSNP file size
+
+3. **Use the mapping file** with `calculate_prs.py` (see Quick Start above)
 
 ## Output Files
 
