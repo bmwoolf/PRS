@@ -46,3 +46,5 @@ nucleus/
 
 # Logs
 *.log
+
+/NUCLEUS_ORIGIN_V1/
