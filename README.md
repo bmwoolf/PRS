@@ -64,16 +64,16 @@ Create the mapping file:
 source .venv/bin/activate
 
 # Create mapping file (this may take 10-30 minutes depending on dbSNP size)
-python create_mapping_bcftools.py \
-  --nucleus /home/bradley-woolf/Desktop/data/nucleus/NUCLEUS_ORIGIN_V1/NUCLEUS_ORIGIN_V1.tsv \
-  --dbsnp 00-common_all.vcf.gz \
-  --output rsid_mapping.tsv
+python scripts/create_mapping_bcftools.py \
+  --nucleus <PATH_TO_NUCLEUS_TSV> \
+  --dbsnp <PATH_TO_DBSNP_VCF> \
+  --output data/mappings/rsid_mapping.tsv
 
 # For testing with limited rsIDs:
-python create_mapping_bcftools.py \
-  --nucleus /home/bradley-woolf/Desktop/data/nucleus/NUCLEUS_ORIGIN_V1/NUCLEUS_ORIGIN_V1.tsv \
-  --dbsnp 00-common_all.vcf.gz \
-  --output test_mapping.tsv \
+python scripts/create_mapping_bcftools.py \
+  --nucleus <PATH_TO_NUCLEUS_TSV> \
+  --dbsnp <PATH_TO_DBSNP_VCF> \
+  --output data/mappings/test_mapping.tsv \
   --limit 1000
 ```
 
@@ -81,17 +81,19 @@ python create_mapping_bcftools.py \
 
 ```bash
 # Test with small sample first (recommended)
-python calculate_prs.py \
-  --nucleus /home/bradley-woolf/Desktop/data/nucleus/NUCLEUS_ORIGIN_V1/NUCLEUS_ORIGIN_V1.tsv \
-  --vcf /home/bradley-woolf/Desktop/wgs_data/Bradley_Woolf_nucleus_dna_download_vcf_NU-YRIT-0309.vcf.gz \
-  --mapping rsid_mapping.tsv \
+python scripts/calculate_prs.py \
+  --nucleus <PATH_TO_NUCLEUS_TSV> \
+  --vcf <PATH_TO_YOUR_VCF> \
+  --mapping data/mappings/rsid_mapping.tsv \
+  --output-dir data/results \
   --test
 
 # Run full calculation
-python calculate_prs.py \
-  --nucleus /home/bradley-woolf/Desktop/data/nucleus/NUCLEUS_ORIGIN_V1/NUCLEUS_ORIGIN_V1.tsv \
-  --vcf /home/bradley-woolf/Desktop/wgs_data/Bradley_Woolf_nucleus_dna_download_vcf_NU-YRIT-0309.vcf.gz \
-  --mapping rsid_mapping.tsv
+python scripts/calculate_prs.py \
+  --nucleus <PATH_TO_NUCLEUS_TSV> \
+  --vcf <PATH_TO_YOUR_VCF> \
+  --mapping data/mappings/rsid_mapping.tsv \
+  --output-dir data/results
 ```
 
 ## Input Files
@@ -112,7 +114,7 @@ The script matches SNPs between the reference and your genome in two ways:
 **Important Notes**:
 - **Mapping file required**: You must provide a mapping file with `--mapping` option for position-based matching
   - Format: TSV with columns: rsID, chr, pos, ref, alt (header optional)
-  - Create using: `python create_mapping_bcftools.py --nucleus NUCLEUS.tsv --dbsnp dbSNP.vcf.gz --output mapping.tsv`
+  - Create using: `python scripts/create_mapping_bcftools.py --nucleus <PATH_TO_NUCLEUS_TSV> --dbsnp <PATH_TO_DBSNP_VCF> --output data/mappings/rsid_mapping.tsv`
 - Not all SNPs in the Nucleus reference will be present in your VCF - this is normal
 - You can test with `--test` flag to process only 1000 SNPs first
 
@@ -138,10 +140,10 @@ The mapping file maps rsIDs to chromosome positions. Create it once and reuse:
 
 2. **Create mapping file**:
    ```bash
-   python create_mapping_bcftools.py \
-     --nucleus /path/to/NUCLEUS_ORIGIN_V1.tsv \
-     --dbsnp 00-common_all.vcf.gz \
-     --output rsid_mapping.tsv
+   python scripts/create_mapping_bcftools.py \
+     --nucleus <PATH_TO_NUCLEUS_TSV> \
+     --dbsnp <PATH_TO_DBSNP_VCF> \
+     --output data/mappings/rsid_mapping.tsv
    ```
    
    This will:
@@ -154,10 +156,27 @@ The mapping file maps rsIDs to chromosome positions. Create it once and reuse:
 
 ## Output Files
 
+Results are saved to `data/results/`:
 - `prs_results.csv`: PRS scores for all 9 diseases (see `prs_results.example.csv` for format)
+- `prs_snp_level.csv`: SNP-level details used in calculation
 - `prs_summary.txt`: Summary statistics and SNP counts (see `prs_summary.example.txt` for format)
 
 **Note**: Actual result files are excluded from git via `.gitignore` to protect PII. Example files are provided as templates.
+
+## Project Structure
+
+```
+PRS/
+├── scripts/              # Python scripts
+│   ├── calculate_prs.py
+│   └── create_mapping_bcftools.py
+├── data/
+│   ├── mappings/         # rsID mapping files (PII)
+│   └── results/          # PRS results (PII)
+├── logs/                 # Log files
+├── README.md
+└── pyproject.toml
+```
 
 ## Diseases Analyzed
 
