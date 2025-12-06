@@ -309,7 +309,7 @@ def match_snps_by_position(
     
     for idx, (rsid, nucleus_snp) in enumerate(nucleus_items):
         if (idx + 1) % 10000 == 0:
-            print(f"  Processed {idx + 1:,} / {len(nucleus_items):,} SNPs... (matched: {len(matched)})")
+            print(f"  Processed {idx + 1:,} / {len(nucleus_items):,} SNPs... (matched: {len(matched)}, dropped: {dropped})")
         
         # Get position from mapping file
         pos_info = mapping.get(rsid)
@@ -318,7 +318,7 @@ def match_snps_by_position(
             continue
         
         chrom = normalize_chrom(pos_info['chrom'])
-        pos = pos_info['pos']
+        pos = int(pos_info['pos'])  # Ensure it's an int
         
         # Look up in VCF - try both with and without 'chr' prefix
         key = (chrom, pos)
